@@ -59,7 +59,7 @@ export function AcceptInvitePage() {
 
   if (loadError) {
     return (
-      <div style={{ maxWidth: 360, margin: "80px auto", fontFamily: "system-ui, sans-serif" }}>
+      <div className="centered-page">
         <p>{loadError}</p>
       </div>
     );
@@ -67,54 +67,63 @@ export function AcceptInvitePage() {
 
   if (!preview) {
     return (
-      <div style={{ maxWidth: 360, margin: "80px auto", fontFamily: "system-ui, sans-serif" }}>
+      <div className="centered-page">
         <p>Loading…</p>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: 360, margin: "80px auto", fontFamily: "system-ui, sans-serif" }}>
-      <h1>Join {preview.organizationName}</h1>
-      <p style={{ fontSize: 14, color: "#64748b" }}>Invited as {preview.email}</p>
+    <div className="auth-page">
+      <div className="auth-card">
+        <h1>Join {preview.organizationName}</h1>
+        <p className="text-small text-muted">Invited as {preview.email}</p>
 
-      {session ? (
-        session.user.email.toLowerCase() === preview.email.toLowerCase() ? (
-          <>
-            {submitError && <p style={{ color: "#b91c1c", fontSize: 14 }}>{submitError}</p>}
-            <button onClick={acceptAsLoggedInUser} disabled={submitting}>
-              {submitting ? "Joining…" : `Accept as ${session.user.name}`}
-            </button>
-          </>
+        {session ? (
+          session.user.email.toLowerCase() === preview.email.toLowerCase() ? (
+            <div style={{ marginTop: 20 }}>
+              {submitError && <p className="text-error">{submitError}</p>}
+              <button className="btn-primary" onClick={acceptAsLoggedInUser} disabled={submitting}>
+                {submitting ? "Joining…" : `Accept as ${session.user.name}`}
+              </button>
+            </div>
+          ) : (
+            <p style={{ marginTop: 20 }}>
+              You're logged in as {session.user.email}, but this invite is for {preview.email}. Log out and accept
+              again as that email.
+            </p>
+          )
         ) : (
-          <p>
-            You're logged in as {session.user.email}, but this invite is for {preview.email}. Log out and accept
-            again as that email.
-          </p>
-        )
-      ) : (
-        <form onSubmit={acceptAsNewUser} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          <input placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} required />
-          <input
-            type="password"
-            placeholder="Choose a password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            required
-            minLength={8}
-          />
-          {submitError && <p style={{ color: "#b91c1c", fontSize: 14 }}>{submitError}</p>}
-          <button type="submit" disabled={submitting}>
-            {submitting ? "Joining…" : "Create account & join"}
-          </button>
-          <p style={{ fontSize: 14 }}>
-            Already have an account?{" "}
-            <Link to="/login" state={{ from: { pathname: `/invites/${token}`, search: "" } }}>
-              Log in first
-            </Link>
-          </p>
-        </form>
-      )}
+          <form onSubmit={acceptAsNewUser} className="stack" style={{ marginTop: 20 }}>
+            <input
+              className="input-field"
+              placeholder="Your name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              required
+            />
+            <input
+              className="input-field"
+              type="password"
+              placeholder="Choose a password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required
+              minLength={8}
+            />
+            {submitError && <p className="text-error">{submitError}</p>}
+            <button className="btn-primary" type="submit" disabled={submitting}>
+              {submitting ? "Joining…" : "Create account & join"}
+            </button>
+            <p className="text-small text-muted">
+              Already have an account?{" "}
+              <Link to="/login" state={{ from: { pathname: `/invites/${token}`, search: "" } }}>
+                Log in first
+              </Link>
+            </p>
+          </form>
+        )}
+      </div>
     </div>
   );
 }

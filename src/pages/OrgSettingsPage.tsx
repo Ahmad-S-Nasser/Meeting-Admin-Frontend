@@ -38,29 +38,37 @@ export function OrgSettingsPage() {
   };
 
   return (
-    <div style={{ maxWidth: 480 }}>
+    <div>
       <h1>{session?.user.organizationName}</h1>
 
-      <h3>Members</h3>
-      {error && <p style={{ color: "#b91c1c" }}>{error}</p>}
-      <ul>
+      <h3 style={{ marginTop: 24 }}>Members</h3>
+      {error && <p className="text-error">{error}</p>}
+      <ul className="list-plain stack">
         {members?.map((m) => (
-          <li key={m.userId}>
-            {m.name} ({m.email}) — {m.role}
+          <li key={m.userId} className="card">
+            {m.name} <span className="text-muted">({m.email})</span> — {m.role}
           </li>
         ))}
       </ul>
 
       {isOwner && (
         <>
-          <h3>Invite someone</h3>
-          <form onSubmit={handleInvite} style={{ display: "flex", gap: 8 }}>
-            <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-            <button type="submit" disabled={submitting}>
+          <h3 style={{ marginTop: 24 }}>Invite someone</h3>
+          <form onSubmit={handleInvite} className="row">
+            <input
+              className="input-field"
+              type="email"
+              placeholder="Email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              style={{ marginBottom: 0 }}
+            />
+            <button className="btn-secondary" type="submit" disabled={submitting}>
               {submitting ? "Sending…" : "Invite"}
             </button>
           </form>
-          {inviteStatus && <p style={{ fontSize: 14 }}>{inviteStatus}</p>}
+          {inviteStatus && <p className="text-small text-muted" style={{ marginTop: 8 }}>{inviteStatus}</p>}
         </>
       )}
     </div>

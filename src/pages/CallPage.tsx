@@ -28,32 +28,21 @@ export function CallPage() {
 
   if (error) {
     return (
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          alignItems: "center",
-          justifyContent: "center",
-          height: "100vh",
-          gap: 12,
-        }}
-      >
-        <p>{error}</p>
-        <button onClick={() => navigate(`/meetings/${id}`)}>Back</button>
+      <div className="centered-page" style={{ flexDirection: "column", gap: 12 }}>
+        <p className="text-error">{error}</p>
+        <button className="btn-secondary" onClick={() => navigate(`/meetings/${id}`)}>
+          Back
+        </button>
       </div>
     );
   }
 
   if (!participantToken || !meeting || !session) {
-    return (
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100vh" }}>
-        Joining call…
-      </div>
-    );
+    return <div className="centered-page text-muted">Joining call…</div>;
   }
 
   return (
-    <div style={{ height: "100vh", background: "#0f172a", color: "white" }}>
+    <div style={{ height: "100vh", background: "var(--bg-dark)", color: "var(--text-main)" }}>
       <CallRoom
         apiBaseUrl={COON_MEETING_API_BASE_URL}
         meetingId={id}

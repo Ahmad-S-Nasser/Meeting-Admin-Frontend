@@ -48,7 +48,7 @@ export function GuestJoinPage() {
 
   if (loadError) {
     return (
-      <div style={{ maxWidth: 360, margin: "80px auto", fontFamily: "system-ui, sans-serif" }}>
+      <div className="centered-page">
         <p>{loadError}</p>
       </div>
     );
@@ -56,7 +56,7 @@ export function GuestJoinPage() {
 
   if (participantToken && preview) {
     return (
-      <div style={{ height: "100vh", background: "#0f172a", color: "white" }}>
+      <div style={{ height: "100vh", background: "var(--bg-dark)", color: "var(--text-main)" }}>
         <CallRoom
           apiBaseUrl={COON_MEETING_API_BASE_URL}
           meetingId={preview.meetingId}
@@ -69,22 +69,31 @@ export function GuestJoinPage() {
 
   if (!preview) {
     return (
-      <div style={{ maxWidth: 360, margin: "80px auto", fontFamily: "system-ui, sans-serif" }}>
-        <p>Loading…</p>
+      <div className="centered-page">
+        <p className="text-muted">Loading…</p>
       </div>
     );
   }
 
   return (
-    <div style={{ maxWidth: 360, margin: "80px auto", fontFamily: "system-ui, sans-serif" }}>
-      <h1>{preview.meetingTitle}</h1>
-      <form onSubmit={handleJoin} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <input placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} required />
-        {submitError && <p style={{ color: "#b91c1c", fontSize: 14 }}>{submitError}</p>}
-        <button type="submit" disabled={submitting}>
-          {submitting ? "Joining…" : "Join call"}
-        </button>
-      </form>
+    <div className="auth-page">
+      <div className="auth-card">
+        <h1>{preview.meetingTitle}</h1>
+        <p className="text-small text-muted">You're joining as a guest.</p>
+        <form onSubmit={handleJoin} className="stack" style={{ marginTop: 20 }}>
+          <input
+            className="input-field"
+            placeholder="Your name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+          {submitError && <p className="text-error">{submitError}</p>}
+          <button className="btn-primary" type="submit" disabled={submitting}>
+            {submitting ? "Joining…" : "Join call"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

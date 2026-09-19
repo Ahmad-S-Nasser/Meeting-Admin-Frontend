@@ -30,33 +30,50 @@ export function SignupPage() {
   };
 
   return (
-    <div style={{ maxWidth: 360, margin: "80px auto", fontFamily: "system-ui, sans-serif" }}>
-      <h1>Create your organization</h1>
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <input placeholder="Your name" value={name} onChange={(e) => setName(e.target.value)} required />
-        <input
-          placeholder="Organization name"
-          value={organizationName}
-          onChange={(e) => setOrganizationName(e.target.value)}
-          required
-        />
-        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          minLength={8}
-        />
-        {error && <p style={{ color: "#b91c1c", fontSize: 14 }}>{error}</p>}
-        <button type="submit" disabled={submitting}>
-          {submitting ? "Creating…" : "Create account"}
-        </button>
-      </form>
-      <p style={{ marginTop: 16, fontSize: 14 }}>
-        Already have an account? <Link to="/login">Log in</Link>
-      </p>
+    <div className="auth-page">
+      <div className="auth-card">
+        <h1>Create your organization</h1>
+        <form onSubmit={handleSubmit} className="stack" style={{ marginTop: 20 }}>
+          <input
+            className="input-field"
+            placeholder="Your name"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            required
+          />
+          <input
+            className="input-field"
+            placeholder="Organization name"
+            value={organizationName}
+            onChange={(e) => setOrganizationName(e.target.value)}
+            required
+          />
+          <input
+            className="input-field"
+            type="email"
+            placeholder="Email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+          />
+          <input
+            className="input-field"
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            minLength={8}
+          />
+          {error && <p className="text-error">{error}</p>}
+          <button className="btn-primary" type="submit" disabled={submitting}>
+            {submitting ? "Creating…" : "Create account"}
+          </button>
+        </form>
+        <p className="text-small text-muted" style={{ marginTop: 20 }}>
+          Already have an account? <Link to="/login">Log in</Link>
+        </p>
+      </div>
     </div>
   );
 }

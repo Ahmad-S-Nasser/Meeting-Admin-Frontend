@@ -48,59 +48,59 @@ export function NewMeetingPage() {
   };
 
   return (
-    <div style={{ maxWidth: 480 }}>
+    <div>
       <h1>New meeting</h1>
-      <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-        <label>
-          Title
-          <input value={title} onChange={(e) => setTitle(e.target.value)} required style={{ display: "block", width: "100%" }} />
-        </label>
-        <label>
-          Date &amp; time
+      <form onSubmit={handleSubmit} style={{ marginTop: 20 }}>
+        <div className="field">
+          <label className="field-label">Title</label>
+          <input className="input-field" value={title} onChange={(e) => setTitle(e.target.value)} required />
+        </div>
+        <div className="field">
+          <label className="field-label">Date &amp; time</label>
           <input
+            className="input-field"
             type="datetime-local"
             value={scheduledAt}
             onChange={(e) => setScheduledAt(e.target.value)}
             required
-            style={{ display: "block", width: "100%" }}
           />
-        </label>
-        <label>
-          Duration (minutes)
+        </div>
+        <div className="field">
+          <label className="field-label">Duration (minutes)</label>
           <input
+            className="input-field"
             type="number"
             value={durationMinutes}
             onChange={(e) => setDurationMinutes(Number(e.target.value))}
             min={5}
-            style={{ display: "block", width: "100%" }}
           />
-        </label>
-        <label>
-          Attendee emails (comma-separated)
+        </div>
+        <div className="field">
+          <label className="field-label">Attendee emails (comma-separated)</label>
           <input
+            className="input-field"
             value={attendeesText}
             onChange={(e) => setAttendeesText(e.target.value)}
             placeholder="alice@example.com, bob@example.com"
-            style={{ display: "block", width: "100%" }}
           />
-        </label>
-        <fieldset style={{ border: "1px solid #e2e8f0", borderRadius: 8, padding: 12 }}>
-          <legend style={{ fontSize: 13, color: "#64748b" }}>Who can join</legend>
-          <label style={{ display: "flex", alignItems: "flex-start", gap: 8, marginBottom: 8 }}>
+        </div>
+        <fieldset className="field-group">
+          <legend>Who can join</legend>
+          <label className="radio-option">
             <input type="radio" name="visibility" checked={visibility === "Private"} onChange={() => setVisibility("Private")} />
             <span>
               <strong>Private</strong> — only the attendees above (or org members you invite later) can join.
             </span>
           </label>
-          <label style={{ display: "flex", alignItems: "flex-start", gap: 8 }}>
+          <label className="radio-option" style={{ marginBottom: 0 }}>
             <input type="radio" name="visibility" checked={visibility === "Any"} onChange={() => setVisibility("Any")} />
             <span>
               <strong>Any</strong> — literally anyone with the meeting's link can join, no account needed.
             </span>
           </label>
         </fieldset>
-        {error && <p style={{ color: "#b91c1c", fontSize: 14 }}>{error}</p>}
-        <button type="submit" disabled={submitting}>
+        {error && <p className="text-error">{error}</p>}
+        <button className="btn-primary" type="submit" disabled={submitting}>
           {submitting ? "Creating…" : "Create meeting"}
         </button>
       </form>

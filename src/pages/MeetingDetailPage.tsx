@@ -77,26 +77,30 @@ export function MeetingDetailPage() {
     }
   };
 
-  if (error) return <p style={{ color: "#b91c1c" }}>{error}</p>;
-  if (!meeting) return <p>Loading…</p>;
+  if (error) return <p className="text-error">{error}</p>;
+  if (!meeting) return <p className="text-muted">Loading…</p>;
 
   return (
-    <div style={{ maxWidth: 480 }}>
+    <div>
       <Link to="/meetings">&larr; Back to meetings</Link>
-      <h1>{meeting.title}</h1>
-      {meeting.status === "Cancelled" && <p style={{ color: "#b91c1c" }}>Cancelled</p>}
-      <p>
-        {new Date(meeting.scheduledAt).toLocaleString()}
-        {meeting.durationMinutes ? ` · ${meeting.durationMinutes} min` : ""}
-      </p>
-      {meeting.description && <p>{meeting.description}</p>}
+      <div style={{ marginTop: 12 }}>
+        <h1>
+          {meeting.title}
+          {meeting.status === "Cancelled" && <span className="badge badge-danger">Cancelled</span>}
+        </h1>
+        <p className="text-muted">
+          {new Date(meeting.scheduledAt).toLocaleString()}
+          {meeting.durationMinutes ? ` · ${meeting.durationMinutes} min` : ""}
+        </p>
+        {meeting.description && <p>{meeting.description}</p>}
+      </div>
 
-      <h3>Attendees</h3>
-      <ul>
+      <h3 style={{ marginTop: 24 }}>Attendees</h3>
+      <ul className="list-plain stack">
         {meeting.attendees.map((a, i) => (
-          <li key={i}>
+          <li key={i} className="card">
             {a.name}
-            {a.email ? ` (${a.email})` : ""}
+            {a.email ? <span className="text-muted"> ({a.email})</span> : ""}
           </li>
         ))}
       </ul>
@@ -105,13 +109,15 @@ export function MeetingDetailPage() {
           reconnect them to mid-call, so this lives here rather than on the call page. */}
       {meeting.isOrganizer && meeting.blockedParticipants.length > 0 && (
         <>
-          <h3>Blocked</h3>
-          <ul>
+          <h3 style={{ marginTop: 24 }}>Blocked</h3>
+          <ul className="list-plain stack">
             {meeting.blockedParticipants.map((b) => (
-              <li key={b.participantExternalId}>
-                {b.name}
-                {b.email && b.email !== b.name ? ` (${b.email})` : ""}{" "}
-                <button onClick={() => handleUnblock(b.participantExternalId)} disabled={busy}>
+              <li key={b.participantExternalId} className="card row-between">
+                <span>
+                  {b.name}
+                  {b.email && b.email !== b.name ? <span className="text-muted"> ({b.email})</span> : ""}
+                </span>
+                <button className="btn-secondary" onClick={() => handleUnblock(b.participantExternalId)} disabled={busy}>
                   Unblock
                 </button>
               </li>
@@ -122,32 +128,52 @@ export function MeetingDetailPage() {
 
       {meeting.isOrganizer && meeting.status !== "Cancelled" && (
         <>
-          <h3>Invite someone</h3>
+          <h3 style={{ marginTop: 24 }}>Invite someone</h3>
           {meeting.visibility === "Any" ? (
             <div>
-              <button onClick={handleGetAnyLink}>Get shareable link</button>
+              <button className="btn-secondary" onClick={handleGetAnyLink}>
+                Get shareable link
+              </button>
               {anyLinkUrl && (
-                <p style={{ fontSize: 14, wordBreak: "break-all" }}>
+                <p className="text-small card" style={{ wordBreak: "break-all", marginTop: 12 }}>
                   Anyone with this link can join: <br />
                   <code>{anyLinkUrl}</code>
                 </p>
               )}
             </div>
           ) : (
-            <form onSubmit={handleInviteGuest} style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
-              <input type="email" placeholder="Email" value={guestEmail} onChange={(e) => setGuestEmail(e.target.value)} required />
-              <input placeholder="Name (optional)" value={guestName} onChange={(e) => setGuestName(e.target.value)} />
-              <button type="submit">Invite</button>
+            <form onSubmit={handleInviteGuest} className="row" style={{ flexWrap: "wrap" }}>
+              <input
+                className="input-field"
+                type="email"
+                placeholder="Email"
+                value={guestEmail}
+                onChange={(e) => setGuestEmail(e.target.value)}
+                required
+                style={{ marginBottom: 0, flex: "1 1 200px" }}
+              />
+              <input
+                className="input-field"
+                placeholder="Name (optional)"
+                value={guestName}
+                onChange={(e) => setGuestName(e.target.value)}
+                style={{ marginBottom: 0, flex: "1 1 160px" }}
+              />
+              <button className="btn-secondary" type="submit">
+                Invite
+              </button>
             </form>
           )}
-          {inviteStatus && <p style={{ fontSize: 14 }}>{inviteStatus}</p>}
+          {inviteStatus && <p className="text-small text-muted" style={{ marginTop: 8 }}>{inviteStatus}</p>}
         </>
       )}
 
       {meeting.status !== "Cancelled" && (
-        <div style={{ display: "flex", gap: 12, marginTop: 16 }}>
-          <button onClick={() => navigate(`/meetings/${id}/call`)}>Join call</button>
-          <button onClick={handleCancel} disabled={busy}>
+        <div className="row" style={{ marginTop: 24 }}>
+          <button className="btn-primary" onClick={() => navigate(`/meetings/${id}/call`)}>
+            Join call
+          </button>
+          <button className="btn-danger" onClick={handleCancel} disabled={busy}>
             {busy ? "Cancelling…" : "Cancel meeting"}
           </button>
         </div>
