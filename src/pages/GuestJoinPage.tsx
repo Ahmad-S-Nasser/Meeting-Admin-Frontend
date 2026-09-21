@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import { CallRoom } from "coon-meeting-sdk";
 import { guestApi, type GuestJoinPreview } from "../api/guest";
 import { ApiError } from "../api/client";
+import { downloadRecording } from "../utils/downloadRecording";
 
 const COON_MEETING_API_BASE_URL = import.meta.env.VITE_COON_MEETING_API_BASE_URL;
 
@@ -62,6 +63,7 @@ export function GuestJoinPage() {
           meetingId={preview.meetingId}
           participantToken={participantToken}
           participantName={name}
+          onRecordingAvailable={downloadRecording}
         />
       </div>
     );

@@ -4,6 +4,7 @@ import { CallRoom } from "coon-meeting-sdk";
 import { meetingsApi, type Meeting } from "../api/meetings";
 import { ApiError } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
+import { downloadRecording } from "../utils/downloadRecording";
 
 const COON_MEETING_API_BASE_URL = import.meta.env.VITE_COON_MEETING_API_BASE_URL;
 
@@ -59,6 +60,7 @@ export function CallPage() {
         onBlockParticipant={(participantId) => {
           meetingsApi.blockParticipant(id, participantId, session.token).catch(() => {});
         }}
+        onRecordingAvailable={downloadRecording}
       />
     </div>
   );
