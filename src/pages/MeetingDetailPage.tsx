@@ -1,6 +1,13 @@
 import { useEffect, useState, type FormEvent } from "react";
 import { useParams, useNavigate, Link } from "react-router-dom";
-import { meetingsApi, type Meeting } from "../api/meetings";
+import {
+  meetingsApi,
+  type Meeting,
+  type MeetingSettings,
+  type PermissionMode,
+  type PermissionPolicy,
+  type SelectablePerson,
+} from "../api/meetings";
 import { ApiError } from "../api/client";
 import { useAuth } from "../auth/AuthContext";
 
@@ -18,6 +25,10 @@ export function MeetingDetailPage() {
   const [guestName, setGuestName] = useState("");
   const [inviteStatus, setInviteStatus] = useState<string | null>(null);
 
+  const [settings, setSettings] = useState<MeetingSettings | null>(null);
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [settingsStatus, setSettingsStatus] = useState<string | null>(null);
+
   useEffect(() => {
     if (!session) return;
     meetingsApi
@@ -25,6 +36,30 @@ export function MeetingDetailPage() {
       .then(setMeeting)
       .catch(() => setError("Couldn't load this meeting."));
   }, [id, session]);
+
+  // Only the organizer can read or change these - everyone else never even asks.
+  const isOrganizer = meeting?.isOrganizer === true;
+  useEffect(() => {
+    if (!session || !isOrganizer) return;
+    meetingsApi
+      .getSettings(id, session.token)
+      .then(setSettings)
+      .catch(() => { /* the card just doesn't render - the rest of the page is unaffected */ });
+  }, [id, session, isOrganizer]);
+
+  const handleSaveSettings = async () => {
+    if (!session || !settings) return;
+    setSavingSettings(true);
+    setSettingsStatus(null);
+    try {
+      await meetingsApi.updateSettings(id, { screenShare: settings.screenShare, recording: settings.recording }, session.token);
+      setSettingsStatus("Saved. People already in a call get it within about 30 seconds.");
+    } catch (err) {
+      setSettingsStatus(err instanceof ApiError ? err.message : "Couldn't save the permissions.");
+    } finally {
+      setSavingSettings(false);
+    }
+  };
 
   const handleCancel = async () => {
     if (!session || !window.confirm("Cancel this meeting?")) return;
@@ -168,6 +203,33 @@ export function MeetingDetailPage() {
         </>
       )}
 
+      {isOrganizer && meeting.status !== "Cancelled" && settings && (
+        <>
+          <h3 style={{ marginTop: 24 }}>Call permissions</h3>
+          <p className="text-small text-muted" style={{ marginTop: 0 }}>
+            You can always share your screen and record. Choose who else may.
+          </p>
+          <PolicyEditor
+            label="Screen sharing"
+            policy={settings.screenShare}
+            people={settings.people}
+            onChange={(screenShare) => setSettings({ ...settings, screenShare })}
+          />
+          <PolicyEditor
+            label="Recording"
+            policy={settings.recording}
+            people={settings.people}
+            onChange={(recording) => setSettings({ ...settings, recording })}
+          />
+          <div className="row">
+            <button className="btn-primary" onClick={handleSaveSettings} disabled={savingSettings}>
+              {savingSettings ? "Saving…" : "Save permissions"}
+            </button>
+            {settingsStatus && <span className="text-small text-muted">{settingsStatus}</span>}
+          </div>
+        </>
+      )}
+
       {meeting.status !== "Cancelled" && (
         <div className="row" style={{ marginTop: 24 }}>
           <button className="btn-primary" onClick={() => navigate(`/meetings/${id}/call`)}>
@@ -179,5 +241,73 @@ export function MeetingDetailPage() {
         </div>
       )}
     </div>
+  );
+}
+
+const MODE_OPTIONS: { mode: PermissionMode; title: string; hint: string }[] = [
+  { mode: "OrganizerOnly", title: "Only me", hint: "Nobody else gets the button." },
+  { mode: "Selected", title: "Selected attendees", hint: "Only the people you tick below." },
+  { mode: "Everyone", title: "Everyone", hint: "Every participant, including guests who join with a shareable link." },
+];
+
+function PolicyEditor({
+  label,
+  policy,
+  people,
+  onChange,
+}: {
+  label: string;
+  policy: PermissionPolicy;
+  people: SelectablePerson[];
+  onChange: (policy: PermissionPolicy) => void;
+}) {
+  const toggle = (externalId: string) => {
+    const has = policy.allowedParticipantIds.includes(externalId);
+    onChange({
+      ...policy,
+      allowedParticipantIds: has
+        ? policy.allowedParticipantIds.filter((x) => x !== externalId)
+        : [...policy.allowedParticipantIds, externalId],
+    });
+  };
+
+  return (
+    <fieldset className="field-group">
+      <legend>{label}</legend>
+      {MODE_OPTIONS.map((o) => (
+        <label key={o.mode} className="radio-option">
+          <input
+            type="radio"
+            name={`policy-${label}`}
+            checked={policy.mode === o.mode}
+            onChange={() => onChange({ ...policy, mode: o.mode })}
+          />
+          <span>
+            <strong>{o.title}</strong> <span className="text-muted">— {o.hint}</span>
+          </span>
+        </label>
+      ))}
+      {policy.mode === "Selected" && (
+        <div style={{ marginTop: 8, paddingLeft: 24 }}>
+          {people.length === 0 ? (
+            <p className="text-small text-muted">No other attendees on this meeting yet.</p>
+          ) : (
+            people.map((p) => (
+              <label key={p.externalId} className="radio-option">
+                <input
+                  type="checkbox"
+                  checked={policy.allowedParticipantIds.includes(p.externalId)}
+                  onChange={() => toggle(p.externalId)}
+                />
+                <span>
+                  {p.name}
+                  {p.email && p.email !== p.name ? <span className="text-muted"> ({p.email})</span> : null}
+                </span>
+              </label>
+            ))
+          )}
+        </div>
+      )}
+    </fieldset>
   );
 }

@@ -60,10 +60,44 @@ export interface CallTokenResponse {
   token: string;
   expiresAt: string;
   meetingId: string;
+  canShareScreen: boolean;
+  canRecord: boolean;
 }
 
 export interface JoinLinkResponse {
   url: string;
+}
+
+export type PermissionMode = "OrganizerOnly" | "Selected" | "Everyone";
+
+export interface PermissionPolicy {
+  mode: PermissionMode;
+  allowedParticipantIds: string[];
+}
+
+export interface SelectablePerson {
+  externalId: string;
+  name: string;
+  email?: string;
+}
+
+/** Who may share a screen / record. The organizer always can, whatever this says. */
+export interface MeetingSettings {
+  screenShare: PermissionPolicy;
+  recording: PermissionPolicy;
+  people: SelectablePerson[];
+}
+
+export interface MyPermissions {
+  canShareScreen: boolean;
+  canRecord: boolean;
+}
+
+export interface InviteLink {
+  url: string;
+  /** "join-link": the reusable guest link - anyone with it can join. "meeting-page": only people
+      already invited can open it. */
+  kind: "join-link" | "meeting-page";
 }
 
 export const meetingsApi = {
@@ -87,4 +121,15 @@ export const meetingsApi = {
   // Private-visibility: adds the email as a verified attendee and mints them a one-person link.
   inviteGuest: (meetingId: string, email: string, name: string | undefined, token: string) =>
     api.post<JoinLinkResponse>(`/api/v1/meetings/${meetingId}/join-links/attendee`, { email, name }, token),
+  // Organizer only.
+  getSettings: (meetingId: string, token: string) =>
+    api.get<MeetingSettings>(`/api/v1/meetings/${meetingId}/settings`, token),
+  updateSettings: (meetingId: string, settings: Pick<MeetingSettings, "screenShare" | "recording">, token: string) =>
+    api.put<void>(`/api/v1/meetings/${meetingId}/settings`, settings, token),
+  // Any participant - polled during a call so a change the organizer makes reaches everyone.
+  myPermissions: (meetingId: string, token: string) =>
+    api.get<MyPermissions>(`/api/v1/meetings/${meetingId}/my-permissions`, token),
+  // Never creates a link - only the organizer mints one; this just reads what already exists.
+  inviteLink: (meetingId: string, token: string) =>
+    api.get<InviteLink>(`/api/v1/meetings/${meetingId}/invite-link`, token),
 };

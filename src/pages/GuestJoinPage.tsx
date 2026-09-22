@@ -18,6 +18,7 @@ export function GuestJoinPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [participantToken, setParticipantToken] = useState<string | null>(null);
+  const [permissions, setPermissions] = useState({ canShareScreen: false, canRecord: false });
 
   useEffect(() => {
     guestApi
@@ -39,6 +40,7 @@ export function GuestJoinPage() {
     setSubmitting(true);
     try {
       const result = await guestApi.mintToken(token, name);
+      setPermissions({ canShareScreen: result.canShareScreen, canRecord: result.canRecord });
       setParticipantToken(result.token);
     } catch (err) {
       setSubmitError(err instanceof ApiError ? err.message : "Couldn't join this call.");
@@ -64,6 +66,12 @@ export function GuestJoinPage() {
           participantToken={participantToken}
           participantName={name}
           onRecordingAvailable={downloadRecording}
+          canShareScreen={permissions.canShareScreen}
+          canRecord={permissions.canRecord}
+          // An "Any" link is a reusable, anyone-can-join link, so handing out this very page is
+          // exactly what "invite someone" means. A per-guest (Attendee) link is a personal 24h
+          // token - sharing it would let someone else join AS this guest - so no button there.
+          getInviteLink={preview.scope === "Any" ? () => window.location.href : undefined}
         />
       </div>
     );

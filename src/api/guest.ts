@@ -12,6 +12,8 @@ export interface GuestJoinToken {
   expiresAt: string;
   meetingId: string;
   participantName: string;
+  canShareScreen: boolean;
+  canRecord: boolean;
 }
 
 // Fully anonymous - no session token on either call.

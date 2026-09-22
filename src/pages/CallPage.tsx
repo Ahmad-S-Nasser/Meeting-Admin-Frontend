@@ -16,6 +16,7 @@ export function CallPage() {
   const [participantToken, setParticipantToken] = useState<string | null>(null);
   const [meeting, setMeeting] = useState<Meeting | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [permissions, setPermissions] = useState({ canShareScreen: false, canRecord: false });
 
   useEffect(() => {
     if (!session) return;
@@ -23,9 +24,24 @@ export function CallPage() {
       .then(([tokenRes, meetingRes]) => {
         setParticipantToken(tokenRes.token);
         setMeeting(meetingRes);
+        setPermissions({ canShareScreen: tokenRes.canShareScreen, canRecord: tokenRes.canRecord });
       })
       .catch((err) => setError(err instanceof ApiError ? err.message : "Couldn't join this call."));
   }, [id, session]);
+
+  // The organizer can change who may share/record while a call is running - re-check so it
+  // reaches people already in it (the call screen hides the buttons and stops a running
+  // share/recording the moment a permission is withdrawn).
+  useEffect(() => {
+    if (!session || !participantToken) return;
+    const timer = setInterval(() => {
+      meetingsApi
+        .myPermissions(id, session.token)
+        .then((p) => setPermissions({ canShareScreen: p.canShareScreen, canRecord: p.canRecord }))
+        .catch(() => { /* keep the last known permissions - a blip shouldn't strip anyone's controls */ });
+    }, 30_000);
+    return () => clearInterval(timer);
+  }, [id, session, participantToken]);
 
   if (error) {
     return (
@@ -61,6 +77,9 @@ export function CallPage() {
           meetingsApi.blockParticipant(id, participantId, session.token).catch(() => {});
         }}
         onRecordingAvailable={downloadRecording}
+        canShareScreen={permissions.canShareScreen}
+        canRecord={permissions.canRecord}
+        getInviteLink={() => meetingsApi.inviteLink(id, session.token).then((r) => r.url)}
       />
     </div>
   );
